@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passage — Review &amp; submit</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0B1220; --dusk:#141F33; --dusk-2:#1B2A45; --amber:#E8A64C; --amber-soft:#F0C784;
+    --parchment:#F3EFE6; --mist:#8B94A8; --verdigris:#4F7566; --line:rgba(243,239,230,0.10); --red:#E07B67; }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--parchment);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;} button{font-family:inherit;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(20px,5vw,56px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,18,32,.9);backdrop-filter:blur(12px);z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-family:'Fraunces',serif;font-weight:600;}
+  .brand .mark{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--amber),var(--verdigris));display:grid;place-items:center;font-size:12px;color:var(--ink);font-weight:700;}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--mist);}
+  .navlinks a.active{color:var(--parchment);}
+
+  main{max-width:920px;margin:0 auto;padding:40px clamp(20px,5vw,56px) 110px;}
+  .conn-banner{display:none;margin-bottom:22px;padding:12px 16px;border-radius:12px;background:rgba(224,123,103,.1);border:1px solid rgba(224,123,103,.35);color:var(--red);font-size:13px;line-height:1.5;}
+  .conn-banner.show{display:block;}
+  .conn-banner code{background:rgba(11,18,32,.5);padding:1px 6px;border-radius:5px;}
+
+  .picker h1{font-size:26px;margin-bottom:8px;}
+  .picker p{color:var(--mist);font-size:14.5px;margin-bottom:22px;}
+  .pick-row{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--dusk);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;cursor:pointer;}
+  .pick-row:hover{border-color:rgba(232,166,76,.35);}
+  .pick-row b{display:block;font-size:14.5px;} .pick-row span{color:var(--mist);font-size:12.5px;}
+
+  .head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:6px;}
+  .head .kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--verdigris);text-transform:uppercase;letter-spacing:.1em;}
+  .head h1{font-size:clamp(24px,3.4vw,32px);margin:8px 0 6px;}
+  .head p{color:var(--mist);font-size:14.5px;}
+  .fee-pill{font-family:'IBM Plex Mono',monospace;font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid rgba(232,166,76,.35);background:rgba(232,166,76,.1);color:var(--amber-soft);white-space:nowrap;height:fit-content;}
+
+  .layout{display:grid;grid-template-columns:1fr 260px;gap:24px;margin-top:28px;align-items:start;}
+  @media (max-width:820px){.layout{grid-template-columns:1fr;}}
+  .section{background:var(--dusk);border:1px solid var(--line);border-radius:16px;margin-bottom:16px;overflow:hidden;}
+  .section-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;}
+  .section-head h3{font-size:15.5px;}
+  .section-head .meta{display:flex;align-items:center;gap:10px;}
+  .autofill-tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mist);border:1px solid var(--line);padding:3px 9px;border-radius:999px;}
+  .check-tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 9px;border-radius:999px;}
+  .check-tag.pending{color:var(--amber-soft);border:1px solid rgba(232,166,76,.35);background:rgba(232,166,76,.08);}
+  .check-tag.reviewed{color:#8fc4ac;border:1px solid rgba(79,117,102,.4);background:rgba(79,117,102,.15);}
+  .chevron{transition:transform .2s ease;color:var(--mist);}
+  .section.open .chevron{transform:rotate(180deg);}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .3s ease;border-top:1px solid transparent;}
+  .section.open .section-body{max-height:600px;border-top-color:var(--line);}
+  .section-body-inner{padding:16px 20px 20px;display:flex;flex-direction:column;gap:12px;}
+  .kv{display:flex;justify-content:space-between;font-size:13.5px;padding:8px 0;border-bottom:1px dashed var(--line);gap:16px;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--mist);}
+  .kv .v{color:var(--parchment);text-align:right;}
+  .gap-note{font-size:12px;color:var(--mist);background:rgba(11,18,32,.4);border:1px dashed var(--line);border-radius:9px;padding:8px 11px;line-height:1.5;}
+  .mark-btn{align-self:flex-start;background:none;border:1px solid var(--line);color:var(--parchment);font-size:12px;padding:7px 12px;border-radius:999px;cursor:pointer;margin-top:4px;}
+  .mark-btn:hover{border-color:var(--amber);color:var(--amber-soft);}
+  .mark-btn.done{border-color:rgba(79,117,102,.4);color:#8fc4ac;}
+  .mark-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .sidebar{position:sticky;top:90px;background:var(--dusk);border:1px solid var(--line);border-radius:16px;padding:20px;}
+  .sidebar h4{font-size:13.5px;margin-bottom:14px;}
+  .progress-track{height:6px;background:var(--dusk-2);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+  .progress-fill{height:100%;background:var(--amber);width:0%;transition:width .3s ease;}
+  .progress-label{font-size:12px;color:var(--mist);margin-bottom:20px;}
+  .confirm-row{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--mist);margin-bottom:18px;line-height:1.5;}
+  .confirm-row input{margin-top:2px;}
+  .submit-final{width:100%;background:linear-gradient(135deg,var(--amber),#d98f3a);color:var(--ink);border:none;border-radius:11px;padding:13px;font-weight:700;font-size:14.5px;cursor:pointer;}
+  .submit-final:disabled{opacity:.4;cursor:not-allowed;}
+  .never-note{font-size:11.5px;color:var(--mist);margin-top:14px;line-height:1.5;display:flex;gap:7px;}
+  .success{display:none;text-align:center;padding:60px 20px;}
+  .success.show{display:block;}
+  .success .check{width:56px;height:56px;border-radius:50%;background:rgba(79,117,102,.2);border:1px solid rgba(79,117,102,.4);display:grid;place-items:center;margin:0 auto 18px;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dusk-2);border:1px solid var(--line);color:var(--parchment);padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;max-width:380px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="landing.html" class="brand"><span class="mark">P</span> Passage</a>
+  <div class="navlinks">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="programs.html">Find programs</a>
+    <a href="sop-drafting.html">Essays</a>
+    <a href="referee-portal.html">Referees</a>
+    <a href="staged-submission.html" class="active">Staged submissions</a>
+  </div>
+</nav>
+
+<main>
+  <div class="conn-banner" id="connBanner"></div>
+
+  <div class="picker" id="picker">
+    <h1>Pick an application to review</h1>
+    <p>These are open a staged-submission link works for — add ?application_id=… to the URL, or just pick one below.</p>
+    <div id="pickList"><p style="color:var(--mist);">Loading…</p></div>
+  </div>
+
+  <div id="reviewFlow" style="display:none;">
+    <div class="head">
+      <div>
+        <span class="kicker">Portal automation — co-pilot mode</span>
+        <h1 id="pageTitle">Loading…</h1>
+        <p>Every field below is pulled from what you've actually given Passage. Nothing has been sent to the portal — expand each section, glance it over, and mark it reviewed.</p>
+      </div>
+      <span class="fee-pill" id="feePill"></span>
+    </div>
+
+    <div class="layout">
+      <div id="sectionsWrap"></div>
+
+      <div class="sidebar">
+        <h4>Review progress</h4>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-label" id="progressLabel">0 of 0 sections reviewed</div>
+        <label class="confirm-row">
+          <input type="checkbox" id="finalConfirm" disabled onchange="updateSubmitState()">
+          I've reviewed everything above and this is ready to go to the portal.
+        </label>
+        <button class="submit-final" id="submitFinalBtn" disabled onclick="finalSubmit()">Submit application</button>
+        <div class="never-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4F7566" stroke-width="2.5" style="flex:none;margin-top:2px;"><path d="M20 6L9 17l-5-5"/></svg>
+          This button is the only thing that submits. Passage never sends a form on its own.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success" id="successPanel">
+    <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8fc4ac" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2 style="font-size:22px;margin-bottom:8px;" id="successHeading">Submitted</h2>
+    <p style="color:var(--mist);font-size:14px;margin-bottom:26px;" id="successBody"></p>
+    <a href="dashboard.html" class="mark-btn" style="display:inline-block;">Back to dashboard</a>
+  </div>
+</main>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<script>
+  const API_BASE = window.PASSAGE_API_BASE || 'http://localhost:8000';
+  const AuthStore = (() => {
+    let mem = {};
+    const safeGet = k => { try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } };
+    return { getAccess: () => safeGet('passage_access') };
+  })();
+  if (!AuthStore.getAccess()) { window.location.href = 'landing.html'; }
+
+  async function apiFetch(path, options = {}) {
+    const token = AuthStore.getAccess();
+    const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    let res;
+    try { res = await fetch(`${API_BASE}${path}`, { ...options, headers }); }
+    catch (e) { throw { offline: true, message: `Can't reach the API at ${API_BASE}. Is the backend running?` }; }
+    if (!res.ok) { let detail = res.statusText; try { detail = (await res.json()).detail || detail; } catch(e){} throw { message: detail }; }
+    return res.status === 204 ? null : res.json();
+  }
+  function connError(msg){
+    const el = document.getElementById('connBanner');
+    el.innerHTML = `${msg} — start it with <code>uvicorn app.main:app --reload</code> from <code>backend/</code>.`;
+    el.classList.add('show');
+  }
+  function centsToDollars(c){ return `$${(c/100).toFixed(2)}`; }
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const applicationId = params.get('application_id');
+
+  let application = null, program = null, me = null, docs = [];
+  let reviewed = new Set();
+  const SECTION_KEYS = ['personal','academic','documents','essay','fee'];
+
+  async function boot(){
+    try { me = await apiFetch('/auth/me'); } catch (err) { connError(err.message); return; }
+
+    if (!applicationId) {
+      showPicker();
+      return;
+    }
+    try {
+      [application, docs] = await Promise.all([apiFetch(`/applications/${applicationId}`), apiFetch('/documents')]);
+      program = await apiFetch(`/programs/${application.program_id}`);
+    } catch (err) {
+      connError(err.message);
+      showPicker();
+      return;
+    }
+    document.getElementById('picker').style.display = 'none';
+    document.getElementById('reviewFlow').style.display = 'block';
+    renderReview();
+  }
+
+  async function showPicker(){
+    document.getElementById('reviewFlow').style.display = 'none';
+    try {
+      const apps = await apiFetch('/applications');
+      const list = document.getElementById('pickList');
+      if (!apps.length) { list.innerHTML = '<p style="color:var(--mist);">No applications yet — add some from <a href="programs.html" style="color:var(--amber-soft);">Find Programs</a>.</p>'; return; }
+      list.innerHTML = apps.map(a => `
+        <div class="pick-row" onclick="window.location.href='staged-submission.html?application_id=${a.id}'">
+          <div><b>${a.university_name}</b><span>${a.program_name} · ${a.status.replace(/_/g,' ')}</span></div>
+          <span class="fee-pill">${a.fee_status === 'fee_required' ? centsToDollars(a.application_fee_cents) + ' fee' : 'No fee'}</span>
+        </div>`).join('');
+    } catch (err) { connError(err.message); }
+  }
+
+  function renderReview(){
+    document.getElementById('pageTitle').textContent = `${application.university_name} — ${application.program_name}`;
+    document.getElementById('feePill').textContent = application.fee_status === 'zero_fee'
+      ? '$0 fee'
+      : `${centsToDollars(application.application_fee_cents)} fee · ${application.fee_confirmed ? 'confirmed' : 'not yet confirmed'}`;
+
+    const docsRows = docs.length
+      ? docs.map(d => `<div class="kv"><span class="k">${d.doc_type.replace(/_/g,' ')}</span><span class="v">${d.ocr_status === 'parsed' ? 'Parsed ✓' : 'Uploaded, pending parse'}</span></div>`).join('')
+      : `<div class="gap-note">No documents in your vault yet — upload some from the Dashboard's Vault tab.</div>`;
+
+    const reqRows = (program.requirements || []).length
+      ? program.requirements.map(r => `<div class="kv"><span class="k">${r.type.replace(/_/g,' ')}${r.is_mandatory ? '' : ' (optional)'}</span><span class="v">${r.description}</span></div>`).join('')
+      : '';
+
+    document.getElementById('sectionsWrap').innerHTML = `
+      <div class="section" data-key="personal">
+        <div class="section-head" onclick="toggle(this.parentElement)">
+          <div class="meta"><h3>Personal information</h3><span class="autofill-tag">from your account</span></div>
+          <div class="meta"><span class="check-tag pending" id="tag-personal">Not yet reviewed</span>${chevron()}</div>
+        </div>
+        <div class="section-body"><div class="section-body-inner">
+          <div class="kv"><span class="k">Full name</span><span class="v">${me.full_name}</span></div>
+          <div class="kv"><span class="k">Email</span><span class="v">${me.email}</span></div>
+          <div class="gap-note">Date of birth, passport number, and nationality aren't part of the student profile schema yet — add them there before this section is fully real.</div>
+          <button class="mark-btn" onclick="markReviewed('personal', this)">Mark reviewed</button>
+        </div></div>
+      </div>
+
+      <div class="section" data-key="academic">
+        <div class="section-head" onclick="toggle(this.parentElement)">
+          <div class="meta"><h3>Academic history &amp; requirements</h3><span class="autofill-tag">from the program</span></div>
+          <div class="meta"><span class="check-tag pending" id="tag-academic">Not yet reviewed</span>${chevron()}</div>
+        </div>
+        <div class="section-body"><div class="section-body-inner">
+          <div class="kv"><span class="k">Degree level</span><span class="v">${program.degree_level}</span></div>
+          <div class="kv"><span class="k">Field</span><span class="v">${program.field_name}</span></div>
+          ${reqRows || '<div class="gap-note">No specific requirements recorded for this program yet.</div>'}
+          <button class="mark-btn" onclick="markReviewed('academic', this)">Mark reviewed</button>
+        </div></div>
+      </div>
+
+      <div class="section" data-key="documents">
+        <div class="section-head" onclick="toggle(this.parentElement)">
+          <div class="meta"><h3>Documents</h3><span class="autofill-tag">from your vault</span></div>
+          <div class="meta"><span class="check-tag pending" id="tag-documents">Not yet reviewed</span>${chevron()}</div>
+        </div>
+        <div class="section-body"><div class="section-body-inner">
+          ${docsRows}
+          <button class="mark-btn" onclick="markReviewed('documents', this)">Mark reviewed</button>
+        </div></div>
+      </div>
+
+      <div class="section" data-key="essay">
+        <div class="section-head" onclick="toggle(this.parentElement)">
+          <div class="meta"><h3>Statement of Purpose</h3><span class="autofill-tag">essays workflow</span></div>
+          <div class="meta"><span class="check-tag pending" id="tag-essay">Not yet reviewed</span>${chevron()}</div>
+        </div>
+        <div class="section-body"><div class="section-body-inner">
+          <div class="gap-note">Essays aren't linked to a specific application automatically yet — draft and approve one from the <a href="sop-drafting.html" style="color:var(--amber-soft);">Essays</a> page for this program, then come back and mark this reviewed.</div>
+          <button class="mark-btn" onclick="markReviewed('essay', this)">Mark reviewed</button>
+        </div></div>
+      </div>
+
+      <div class="section" data-key="fee">
+        <div class="section-head" onclick="toggle(this.parentElement)">
+          <div class="meta"><h3>Application fee</h3><span class="autofill-tag">wallet</span></div>
+          <div class="meta"><span class="check-tag pending" id="tag-fee">Not yet reviewed</span>${chevron()}</div>
+        </div>
+        <div class="section-body"><div class="section-body-inner">
+          <div class="kv"><span class="k">Fee</span><span class="v">${application.fee_status === 'zero_fee' ? '$0.00 — no fee required' : centsToDollars(application.application_fee_cents)}</span></div>
+          <div class="kv"><span class="k">Status</span><span class="v">${application.fee_confirmed ? 'Confirmed & charged' : 'Not yet confirmed'}</span></div>
+          ${application.fee_status !== 'zero_fee' && !application.fee_confirmed ? `<button class="mark-btn" onclick="confirmFee(this)">Confirm &amp; charge now</button>` : ''}
+          <button class="mark-btn" onclick="markReviewed('fee', this)">Mark reviewed</button>
+        </div></div>
+      </div>
+    `;
+    updateProgress();
+  }
+
+  function chevron(){ return `<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`; }
+  function toggle(sec){ sec.classList.toggle('open'); }
+
+  function markReviewed(key, btn){
+    reviewed.add(key);
+    document.getElementById('tag-'+key).textContent = 'Reviewed';
+    document.getElementById('tag-'+key).className = 'check-tag reviewed';
+    btn.textContent = 'Reviewed ✓'; btn.classList.add('done'); btn.disabled = true;
+    updateProgress();
+  }
+
+  async function confirmFee(btn){
+    btn.disabled = true; btn.textContent = 'Charging…';
+    try {
+      await apiFetch('/wallet/fee/confirm', { method:'POST', body: JSON.stringify({ application_id: application.id, confirmed: true }) });
+      application.fee_confirmed = true;
+      showToast('Fee confirmed and charged from your wallet');
+      renderReview();
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Confirm & charge now';
+      showToast(err.message || 'Could not confirm — check your wallet balance on the Dashboard');
+    }
+  }
+
+  function updateProgress(){
+    const pct = Math.round((reviewed.size / SECTION_KEYS.length) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `${reviewed.size} of ${SECTION_KEYS.length} sections reviewed`;
+    const feeBlocking = application.fee_status !== 'zero_fee' && !application.fee_confirmed;
+    const checkbox = document.getElementById('finalConfirm');
+    checkbox.disabled = !(reviewed.size === SECTION_KEYS.length && !feeBlocking);
+    if (checkbox.disabled) checkbox.checked = false;
+    updateSubmitState();
+  }
+  function updateSubmitState(){
+    document.getElementById('submitFinalBtn').disabled = !document.getElementById('finalConfirm').checked;
+  }
+
+  async function finalSubmit(){
+    const btn = document.getElementById('submitFinalBtn');
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+      await apiFetch(`/applications/${application.id}/status`, { method:'PATCH', body: JSON.stringify({ status: 'submitted' }) });
+      document.getElementById('reviewFlow').style.display = 'none';
+      document.getElementById('successHeading').textContent = `Submitted to ${application.university_name}`;
+      document.getElementById('successBody').textContent = application.fee_confirmed
+        ? `${centsToDollars(application.application_fee_cents)} charged to your wallet. You'll see status updates on your dashboard as they come in.`
+        : `No fee was required. You'll see status updates on your dashboard as they come in.`;
+      document.getElementById('successPanel').classList.add('show');
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Submit application';
+      showToast(err.message || 'Could not submit — try again');
+    }
+  }
+
+  boot();
+</script>
+</body>
+</html>

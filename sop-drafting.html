@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passage — Draft your Statement of Purpose</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0B1220; --dusk:#141F33; --dusk-2:#1B2A45; --amber:#E8A64C; --amber-soft:#F0C784;
+    --parchment:#F3EFE6; --mist:#8B94A8; --verdigris:#4F7566; --line:rgba(243,239,230,0.10); --red:#E07B67; }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--parchment);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;} button{font-family:inherit;}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(20px,5vw,56px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,18,32,.9);backdrop-filter:blur(12px);z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-family:'Fraunces',serif;font-weight:600;}
+  .brand .mark{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--amber),var(--verdigris));display:grid;place-items:center;font-size:12px;color:var(--ink);font-weight:700;}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--mist);}
+  .navlinks a.active{color:var(--parchment);}
+
+  main{max-width:840px;margin:0 auto;padding:44px clamp(20px,5vw,56px) 100px;}
+  .head .kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--verdigris);text-transform:uppercase;letter-spacing:.1em;}
+  .head h1{font-size:clamp(26px,3.6vw,36px);margin:10px 0 10px;}
+  .head p{color:var(--mist);font-size:15px;line-height:1.6;}
+
+  .conn-banner{display:none;margin:18px 0;padding:12px 16px;border-radius:12px;background:rgba(224,123,103,.1);border:1px solid rgba(224,123,103,.35);color:var(--red);font-size:13px;line-height:1.5;}
+  .conn-banner.show{display:block;}
+  .conn-banner code{background:rgba(11,18,32,.5);padding:1px 6px;border-radius:5px;}
+
+  .steps{display:flex;gap:8px;margin:28px 0 32px;}
+  .step-dot{flex:1;height:4px;border-radius:99px;background:var(--line);}
+  .step-dot.done{background:var(--verdigris);}
+  .step-dot.current{background:var(--amber);}
+
+  .panel{background:var(--dusk);border:1px solid var(--line);border-radius:18px;padding:28px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:13px;color:var(--mist);margin-bottom:7px;}
+  .field input, .field select, .field textarea{width:100%;background:rgba(11,18,32,.6);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--parchment);font-size:14.5px;font-family:inherit;}
+  .field textarea{resize:vertical;min-height:90px;line-height:1.5;}
+  .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--amber);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.field-row{grid-template-columns:1fr;}}
+
+  .actions{display:flex;justify-content:space-between;margin-top:8px;}
+  .btn-primary{background:linear-gradient(135deg,var(--amber),#d98f3a);color:var(--ink);border:none;border-radius:11px;padding:12px 22px;font-weight:700;font-size:14.5px;cursor:pointer;}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-ghost{background:none;border:1px solid var(--line);color:var(--parchment);border-radius:11px;padding:12px 20px;font-size:14.5px;cursor:pointer;}
+
+  .draft-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .draft-meta .for{font-size:13.5px;color:var(--mist);}
+  .draft-meta .for b{color:var(--parchment);}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);}
+  .badge.ok{background:rgba(79,117,102,.2);color:#8fc4ac;border-color:rgba(79,117,102,.4);}
+  #draftArea{min-height:340px;font-size:14.5px;line-height:1.7;}
+  .word-count{font-size:12px;color:var(--mist);margin-top:8px;font-family:'IBM Plex Mono',monospace;}
+  .human-note{margin-top:18px;font-size:12.5px;color:var(--mist);border:1px solid var(--line);background:rgba(11,18,32,.5);padding:10px 14px;border-radius:10px;display:flex;gap:8px;align-items:flex-start;}
+  .approved-banner{display:none;margin-top:18px;padding:14px 16px;border-radius:12px;background:rgba(79,117,102,.12);border:1px solid rgba(79,117,102,.4);color:#8fc4ac;font-size:13.5px;align-items:center;gap:10px;}
+  .approved-banner.show{display:flex;}
+</style>
+</head>
+<body>
+<nav>
+  <a href="landing.html" class="brand"><span class="mark">P</span> Passage</a>
+  <div class="navlinks">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="programs.html">Find programs</a>
+    <a href="sop-drafting.html" class="active">Essays</a>
+    <a href="referee-portal.html">Referees</a>
+  </div>
+</nav>
+
+<main>
+  <div class="head">
+    <span class="kicker">Content &amp; SOP tailoring agent</span>
+    <h1>Draft your Statement of Purpose</h1>
+    <p>Tell us the material once — the agent drafts from what you actually wrote, tailored to your target program. You edit and approve before it ever attaches to an application.</p>
+  </div>
+
+  <div class="conn-banner" id="connBanner"></div>
+  <div class="steps"><div class="step-dot" id="dot-0"></div><div class="step-dot" id="dot-1"></div><div class="step-dot" id="dot-2"></div></div>
+
+  <div class="panel" id="step-0">
+    <h3 style="font-size:18px;margin-bottom:18px;">A little about you and the program</h3>
+    <div class="field-row">
+      <div class="field"><label>Target program</label>
+        <select id="targetProgram"><option value="">Loading your matched programs…</option></select>
+      </div>
+      <div class="field"><label>Essay type</label>
+        <select id="essayType"><option value="sop">Statement of Purpose</option><option value="motivation_letter">Motivation Letter</option><option value="lor_draft">LOR draft (for a referee to edit)</option></select>
+      </div>
+    </div>
+    <div class="field"><label>What drew you to this specific program? (mention faculty, labs, or coursework if you know them)</label>
+      <textarea id="whyProgram" placeholder="e.g. Their applied robotics lab's work on legged locomotion connects directly to my undergrad thesis on gait control..."></textarea>
+    </div>
+    <div class="field"><label>Your background — projects, research, work that's relevant</label>
+      <textarea id="background" placeholder="Two or three sentences on what you've actually done"></textarea>
+    </div>
+    <div class="field"><label>What you want to do after this degree</label>
+      <textarea id="goals" placeholder="Where this is headed"></textarea>
+    </div>
+    <div class="actions"><span></span><button class="btn-primary" id="continueBtn" disabled onclick="submitDraft()">Draft it</button></div>
+  </div>
+
+  <div class="panel" id="step-1" style="display:none;text-align:center;padding:60px 28px;">
+    <div class="mono" style="font-size:13px;color:var(--amber-soft);margin-bottom:14px;" id="genStatus">Sending your intake to the drafting agent…</div>
+    <div style="height:4px;background:var(--line);border-radius:99px;overflow:hidden;max-width:320px;margin:0 auto;">
+      <div id="genBar" style="height:100%;width:0%;background:var(--amber);transition:width .4s ease;"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="step-2" style="display:none;">
+    <div class="draft-meta">
+      <span class="for">Draft for <b id="draftForLabel"></b></span>
+      <span class="badge ok" id="originalityBadge">Originality check pending</span>
+    </div>
+    <div class="field"><textarea id="draftArea"></textarea></div>
+    <div class="word-count" id="wordCount"></div>
+    <div class="human-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F7566" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      This is a starting draft built from what you told us. Read it fully, make it sound like you, and only approve when it does — nothing gets attached to an application until you do.
+    </div>
+    <div class="actions">
+      <button class="btn-ghost" onclick="goStep(0)">← Edit inputs</button>
+      <button class="btn-primary" id="approveBtn" onclick="approveDraft()">Save &amp; approve this draft</button>
+    </div>
+    <div class="approved-banner" id="approvedBanner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8fc4ac" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      <span id="approvedText">Approved.</span>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dusk-2);border:1px solid var(--line);color:var(--parchment);padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;max-width:380px;"><span id="toastText"></span></div>
+
+<script>
+  const API_BASE = window.PASSAGE_API_BASE || 'http://localhost:8000';
+  const AuthStore = (() => {
+    let mem = {};
+    const safeGet = k => { try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } };
+    return { getAccess: () => safeGet('passage_access') };
+  })();
+  if (!AuthStore.getAccess()) { window.location.href = 'landing.html'; }
+
+  async function apiFetch(path, options = {}) {
+    const token = AuthStore.getAccess();
+    const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    let res;
+    try { res = await fetch(`${API_BASE}${path}`, { ...options, headers }); }
+    catch (e) { throw { offline: true, message: `Can't reach the API at ${API_BASE}. Is the backend running?` }; }
+    if (!res.ok) { let detail = res.statusText; try { detail = (await res.json()).detail || detail; } catch(e){} throw { message: detail }; }
+    return res.status === 204 ? null : res.json();
+  }
+  function connError(msg){
+    const el = document.getElementById('connBanner');
+    el.innerHTML = `${msg} — start it with <code>uvicorn app.main:app --reload</code> from <code>backend/</code>.`;
+    el.classList.add('show');
+  }
+
+  function goStep(n){
+    [0,1,2].forEach(i=>{
+      document.getElementById('step-'+i).style.display = i===n ? '' : 'none';
+      document.getElementById('dot-'+i).className = 'step-dot' + (i<n?' done':i===n?' current':'');
+    });
+  }
+  goStep(0);
+
+  async function loadPrograms(){
+    const sel = document.getElementById('targetProgram');
+    try {
+      const programs = await apiFetch('/programs?limit=100');
+      if (!programs.length) {
+        sel.innerHTML = '<option value="">No programs yet — add some on Find Programs first</option>';
+        return;
+      }
+      sel.innerHTML = programs.map(p => `<option value="${p.id}">${p.university_name} — ${p.name}</option>`).join('');
+      checkReady();
+    } catch (err) {
+      connError(err.message);
+      sel.innerHTML = '<option value="">Could not load programs</option>';
+    }
+  }
+
+  function checkReady(){
+    const ready = document.getElementById('targetProgram').value &&
+      document.getElementById('whyProgram').value.trim() &&
+      document.getElementById('background').value.trim() &&
+      document.getElementById('goals').value.trim();
+    document.getElementById('continueBtn').disabled = !ready;
+  }
+  ['whyProgram','background','goals'].forEach(id => document.getElementById(id).addEventListener('input', checkReady));
+  document.getElementById('targetProgram').addEventListener('change', checkReady);
+
+  let currentEssay = null;
+
+  async function submitDraft(){
+    goStep(1);
+    const statusEl = document.getElementById('genStatus');
+    const bar = document.getElementById('genBar');
+    const stages = ["Sending your intake to the drafting agent…","Matching tone to the program's focus areas…","Structuring opening, body, and closing…"];
+    let i = 0;
+    const iv = setInterval(()=>{ i = Math.min(i+1, stages.length-1); statusEl.textContent = stages[i]; bar.style.width = (20+i*30)+'%'; }, 500);
+
+    const sel = document.getElementById('targetProgram');
+    try {
+      const essay = await apiFetch('/essays/draft', {
+        method: 'POST',
+        body: JSON.stringify({
+          program_id: sel.value,
+          essay_type: document.getElementById('essayType').value,
+          why_program: document.getElementById('whyProgram').value.trim(),
+          background: document.getElementById('background').value.trim(),
+          goals: document.getElementById('goals').value.trim(),
+        }),
+      });
+      clearInterval(iv); bar.style.width = '100%';
+      currentEssay = essay;
+      setTimeout(()=>{
+        document.getElementById('draftForLabel').textContent = sel.options[sel.selectedIndex].textContent;
+        document.getElementById('draftArea').value = essay.student_edited_text || essay.draft_text;
+        document.getElementById('originalityBadge').textContent = essay.originality_check_pct != null ? `Originality check — ${essay.originality_check_pct}% original` : 'Originality check pending';
+        updateWordCount();
+        goStep(2);
+      }, 350);
+    } catch (err) {
+      clearInterval(iv);
+      showToast(err.message || 'Could not draft the essay');
+      goStep(0);
+    }
+  }
+
+  document.getElementById('draftArea').addEventListener('input', updateWordCount);
+  function updateWordCount(){
+    const words = document.getElementById('draftArea').value.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('wordCount').textContent = words + ' words';
+  }
+
+  async function approveDraft(){
+    if (!currentEssay) return;
+    const btn = document.getElementById('approveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await apiFetch(`/essays/${currentEssay.id}`, { method:'PATCH', body: JSON.stringify({ student_edited_text: document.getElementById('draftArea').value }) });
+      const approved = await apiFetch(`/essays/${currentEssay.id}/approve`, { method:'POST' });
+      btn.textContent = 'Approved ✓';
+      document.getElementById('approvedText').textContent = `Approved and saved. Status: ${approved.status}.`;
+      document.getElementById('approvedBanner').classList.add('show');
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Save & approve this draft';
+      showToast(err.message || 'Could not save');
+    }
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+  }
+
+  loadPrograms();
+</script>
+</body>
+</html>

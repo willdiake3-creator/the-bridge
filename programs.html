@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passage — Find your program</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0B1220; --dusk:#141F33; --dusk-2:#1B2A45; --amber:#E8A64C; --amber-soft:#F0C784;
+    --parchment:#F3EFE6; --mist:#8B94A8; --verdigris:#4F7566; --line:rgba(243,239,230,0.10); --red:#E07B67; }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--parchment);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(20px,5vw,56px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,18,32,0.9);backdrop-filter:blur(12px);z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-family:'Fraunces',serif;font-weight:600;}
+  .brand .mark{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--amber),var(--verdigris));display:grid;place-items:center;font-size:12px;color:var(--ink);font-weight:700;}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--mist);}
+  .navlinks a.active{color:var(--parchment);}
+  .navlinks a:hover{color:var(--parchment);}
+
+  main{padding:44px clamp(20px,5vw,56px) 90px; max-width:1180px; margin:0 auto;}
+  .head{max-width:680px;margin-bottom:30px;}
+  .head .kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--verdigris);text-transform:uppercase;letter-spacing:.1em;}
+  .head h1{font-size:clamp(28px,4vw,40px);margin:10px 0 12px;}
+  .head p{color:var(--mist);font-size:15.5px;line-height:1.6;margin:0;}
+  .disclaimer{margin-top:16px;font-size:12.5px;color:var(--mist);border:1px solid var(--line);background:var(--dusk);padding:10px 14px;border-radius:10px;line-height:1.55;}
+  .disclaimer b{color:var(--amber-soft);font-weight:600;}
+
+  .conn-banner{
+    display:none;margin:18px 0;padding:12px 16px;border-radius:12px;background:rgba(224,123,103,.1);
+    border:1px solid rgba(224,123,103,.35);color:var(--red);font-size:13px;line-height:1.5;
+  }
+  .conn-banner.show{display:block;}
+  .conn-banner code{background:rgba(11,18,32,.5);padding:1px 6px;border-radius:5px;}
+
+  .searchbar{display:flex;gap:10px;margin:26px 0 18px;}
+  .searchbar input{flex:1;background:var(--dusk);border:1px solid var(--line);border-radius:12px;padding:13px 16px;color:var(--parchment);font-size:14.5px;}
+  .searchbar input:focus{border-color:var(--amber);}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .filters .group{display:flex;flex-wrap:wrap;gap:8px;padding-right:14px;border-right:1px solid var(--line);}
+  .filters .group:last-child{border-right:none;}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:12px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--dusk);color:var(--mist);cursor:pointer;transition:.15s;}
+  .chip:hover{color:var(--parchment);}
+  .chip.on{background:var(--amber);color:var(--ink);border-color:var(--amber);font-weight:600;}
+
+  .count{margin:22px 0 14px;font-size:13px;color:var(--mist);font-family:'IBM Plex Mono',monospace;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+  .card{background:linear-gradient(180deg,var(--dusk),var(--dusk-2));border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px;transition:transform .2s ease,border-color .2s ease;}
+  .card:hover{transform:translateY(-3px);border-color:rgba(232,166,76,.35);}
+  .card .cat{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--verdigris);text-transform:uppercase;letter-spacing:.08em;}
+  .card h3{font-size:17.5px;line-height:1.25;}
+  .card .blurb{font-size:13px;color:var(--mist);line-height:1.5;}
+  .unis{display:flex;flex-direction:column;gap:8px;margin-top:2px;}
+  .uni-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;background:rgba(11,18,32,.5);border:1px solid var(--line);border-radius:9px;padding:8px 10px;}
+  .uni-row .u-name{color:var(--parchment);font-weight:500;}
+  .uni-row .u-meta{color:var(--mist);font-size:11px;}
+  .fee-tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 8px;border-radius:999px;white-space:nowrap;}
+  .fee-zero_fee{background:rgba(79,117,102,.2);color:#8fc4ac;border:1px solid rgba(79,117,102,.4);}
+  .fee-fee_waiver_available{background:rgba(232,166,76,.15);color:var(--amber-soft);border:1px solid rgba(232,166,76,.35);}
+  .fee-fee_required{background:rgba(139,148,168,.12);color:var(--mist);border:1px solid var(--line);}
+  .scholarship{margin-top:4px;font-size:12px;padding:9px 11px;border-radius:9px;background:rgba(232,166,76,.06);border:1px dashed rgba(232,166,76,.3);color:var(--amber-soft);}
+  .scholarship b{color:var(--parchment);}
+  .card-cta{margin-top:6px;align-self:flex-start;font-size:12.5px;background:none;border:1px solid var(--line);color:var(--parchment);padding:8px 14px;border-radius:999px;cursor:pointer;}
+  .card-cta:hover{border-color:var(--amber);color:var(--amber-soft);}
+  .card-cta:disabled{opacity:.6;cursor:default;}
+  .empty{padding:60px 0;text-align:center;color:var(--mist);}
+  .skeleton{padding:60px 0;text-align:center;color:var(--mist);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dusk-2);border:1px solid var(--line);color:var(--parchment);padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;max-width:380px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="landing.html" class="brand"><span class="mark">P</span> Passage</a>
+  <div class="navlinks">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="programs.html" class="active">Find programs</a>
+    <a href="sop-drafting.html">Essays</a>
+    <a href="referee-portal.html">Referees</a>
+  </div>
+  <div class="navlinks"><span class="mono" id="whoami" style="color:var(--mist);font-size:12.5px;"></span></div>
+</nav>
+
+<main>
+  <div class="head">
+    <span class="kicker">Targeted search</span>
+    <h1>Narrow it down to your field</h1>
+    <p>Pick a field of study across 50 tracks and six disciplines. Each one is pre-matched to real degree programs and the scholarships most students in that field actually use — filter by level, region, and fee strategy.</p>
+    <div class="disclaimer"><b>About this list —</b> the universities and scholarships below are real, well-known programs seeded into the catalog database. In production the Global Catalog Agent keeps deadlines, fees, and availability current by scraping each portal directly — always double-check specifics on the official program page before you rely on them.</div>
+  </div>
+
+  <div class="conn-banner" id="connBanner"></div>
+
+  <div class="searchbar">
+    <input id="searchInput" type="text" placeholder="Search a field — e.g. cybersecurity, nursing, renewable energy…">
+  </div>
+  <div class="filters">
+    <div class="group" id="catFilters"></div>
+    <div class="group" id="levelFilters"></div>
+    <div class="group" id="regionFilters"></div>
+    <div class="group" id="feeFilters"></div>
+  </div>
+
+  <div class="count" id="resultCount"></div>
+  <div class="skeleton" id="loadingState">Loading the catalog…</div>
+  <div class="grid" id="resultsGrid"></div>
+  <div class="empty" id="emptyState" style="display:none;">No fields match those filters yet. Try clearing one.</div>
+</main>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<script>
+  const API_BASE = window.PASSAGE_API_BASE || 'http://localhost:8000';
+  const AuthStore = (() => {
+    let mem = {};
+    const safeGet = k => { try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } };
+    const safeSet = (k,v) => { try { localStorage.setItem(k,v); } catch(e){ mem[k]=v; } };
+    return { getAccess: () => safeGet('passage_access') };
+  })();
+  async function apiFetch(path, options = {}) {
+    const token = AuthStore.getAccess();
+    const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    let res;
+    try { res = await fetch(`${API_BASE}${path}`, { ...options, headers }); }
+    catch (e) { throw { offline: true, message: `Can't reach the API at ${API_BASE}. Is the backend running?` }; }
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = (await res.json()).detail || detail; } catch(e){}
+      throw { message: detail };
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  if (AuthStore.getAccess()) {
+    apiFetch('/auth/me').then(me => { document.getElementById('whoami').textContent = `signed in as ${me.email}`; }).catch(()=>{});
+  } else {
+    document.getElementById('whoami').innerHTML = '<a href="landing.html" style="color:var(--amber-soft);">Sign in</a> to shortlist programs';
+  }
+
+  const REGION_ORDER = ["North America","Europe","Eastern Europe","Asia"];
+  let fieldCards = [];      // built by grouping /programs rows by field_slug
+  let scholarshipByField = {};
+  const state = { search:"", cat:null, level:null, region:null, fee:null };
+
+  function connError(msg){
+    const el = document.getElementById('connBanner');
+    el.innerHTML = `${msg} — start it with <code>uvicorn app.main:app --reload</code> from the <code>backend/</code> folder, or point <code>window.PASSAGE_API_BASE</code> at wherever it's running.`;
+    el.classList.add('show');
+    document.getElementById('loadingState').style.display = 'none';
+  }
+
+  async function loadCatalog(){
+    let programs, fields;
+    try {
+      [programs, fields] = await Promise.all([
+        apiFetch('/programs?limit=300'),
+        apiFetch('/fields'),
+      ]);
+    } catch (err) {
+      connError(err.message || 'Could not load the catalog');
+      return;
+    }
+    document.getElementById('loadingState').style.display = 'none';
+
+    const fieldMeta = {};
+    fields.forEach(f => fieldMeta[f.slug] = f);
+
+    const grouped = {};
+    programs.forEach(p => {
+      if (!grouped[p.field_slug]) grouped[p.field_slug] = [];
+      grouped[p.field_slug].push(p);
+    });
+
+    fieldCards = Object.entries(grouped).map(([slug, progs]) => ({
+      slug,
+      category: fieldMeta[slug]?.category || progs[0].field_name,
+      name: fieldMeta[slug]?.name || progs[0].field_name,
+      programs: progs,
+    }));
+
+    // One scholarship lookup per field (all programs in a field share the
+    // seeded scholarship), fetched in parallel.
+    await Promise.all(fieldCards.map(async fc => {
+      try {
+        const list = await apiFetch(`/programs/${fc.programs[0].id}/scholarships`);
+        scholarshipByField[fc.slug] = list[0] || null;
+      } catch (e) { scholarshipByField[fc.slug] = null; }
+    }));
+
+    render();
+  }
+
+  function chip(label, active, onClick){
+    const b = document.createElement('button');
+    b.className = 'chip' + (active ? ' on' : '');
+    b.textContent = label;
+    b.onclick = onClick;
+    return b;
+  }
+
+  function renderFilters(){
+    const cats = [...new Set(fieldCards.map(f=>f.category))];
+    const regions = REGION_ORDER.filter(r => fieldCards.some(f => f.programs.some(p=>p.region===r)));
+    const levels = [...new Set(fieldCards.flatMap(f=>f.programs.map(p=>p.degree_level)))];
+
+    const catWrap = document.getElementById('catFilters'); catWrap.innerHTML='';
+    catWrap.appendChild(chip('All fields', state.cat===null, ()=>{state.cat=null; render();}));
+    cats.forEach(c=> catWrap.appendChild(chip(c, state.cat===c, ()=>{state.cat = state.cat===c?null:c; render();})));
+
+    const lvlWrap = document.getElementById('levelFilters'); lvlWrap.innerHTML='';
+    lvlWrap.appendChild(chip('Any level', state.level===null, ()=>{state.level=null; render();}));
+    levels.forEach(l=> lvlWrap.appendChild(chip(l, state.level===l, ()=>{state.level = state.level===l?null:l; render();})));
+
+    const regWrap = document.getElementById('regionFilters'); regWrap.innerHTML='';
+    regWrap.appendChild(chip('Any region', state.region===null, ()=>{state.region=null; render();}));
+    regions.forEach(r=> regWrap.appendChild(chip(r, state.region===r, ()=>{state.region = state.region===r?null:r; render();})));
+
+    const feeWrap = document.getElementById('feeFilters'); feeWrap.innerHTML='';
+    feeWrap.appendChild(chip('Any fee', state.fee===null, ()=>{state.fee=null; render();}));
+    [["zero_fee","$0 fee"],["fee_waiver_available","Waiver-eligible"],["fee_required","Fee-required"]].forEach(([k,l])=>
+      feeWrap.appendChild(chip(l, state.fee===k, ()=>{state.fee = state.fee===k?null:k; render();})));
+  }
+
+  function feeTag(status){
+    const label = {zero_fee:"$0 fee", fee_waiver_available:"Waiver-eligible", fee_required:"Fee-required"}[status] || status;
+    return `<span class="fee-tag fee-${status}">${label}</span>`;
+  }
+
+  function matches(fc){
+    if(state.cat && fc.category!==state.cat) return false;
+    if(state.search && !(fc.name.toLowerCase().includes(state.search) || fc.category.toLowerCase().includes(state.search))) return false;
+    if(state.level && !fc.programs.some(p=>p.degree_level===state.level)) return false;
+    if(state.region && !fc.programs.some(p=>p.region===state.region)) return false;
+    if(state.fee && !fc.programs.some(p=>p.fee_status===state.fee)) return false;
+    return true;
+  }
+
+  async function addToShortlist(slug, btn){
+    if(!AuthStore.getAccess()){
+      showToast('Sign in first — taking you there…');
+      setTimeout(()=>{ window.location.href = 'landing.html'; }, 900);
+      return;
+    }
+    const fc = fieldCards.find(f=>f.slug===slug);
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+      await Promise.all(fc.programs.map(p => apiFetch('/applications', { method:'POST', body: JSON.stringify({ program_id: p.id }) })));
+      btn.textContent = '✓ Added — matching now';
+      btn.style.borderColor = 'var(--verdigris)'; btn.style.color = '#8fc4ac';
+      showToast(`${fc.name} added to your applications`);
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Add to shortlist';
+      showToast(err.message || 'Could not add — try again');
+    }
+  }
+
+  function render(){
+    renderFilters();
+    const grid = document.getElementById('resultsGrid');
+    const results = fieldCards.filter(matches);
+    document.getElementById('resultCount').textContent = fieldCards.length ? `${results.length} of ${fieldCards.length} fields` : '';
+    document.getElementById('emptyState').style.display = (results.length || !fieldCards.length) ? 'none' : 'block';
+    grid.innerHTML = results.map(fc=>{
+      let progs = fc.programs;
+      if(state.level) progs = progs.filter(p=>p.degree_level===state.level).length ? progs.filter(p=>p.degree_level===state.level) : progs;
+      if(state.region) progs = progs.filter(p=>p.region===state.region).length ? progs.filter(p=>p.region===state.region) : progs;
+      if(state.fee) progs = progs.filter(p=>p.fee_status===state.fee).length ? progs.filter(p=>p.fee_status===state.fee) : progs;
+      const sch = scholarshipByField[fc.slug];
+      return `
+      <div class="card">
+        <span class="cat">${fc.category}</span>
+        <h3>${fc.name}</h3>
+        <div class="unis">
+          ${progs.map(p=>`
+            <div class="uni-row">
+              <div><div class="u-name">${p.university_name}</div><div class="u-meta">${p.country} · ${p.degree_level}</div></div>
+              ${feeTag(p.fee_status)}
+            </div>`).join('')}
+        </div>
+        ${sch ? `<div class="scholarship"><b>${sch.name}</b>${sch.covers ? ' — '+sch.covers : ''}</div>` : ''}
+        <button class="card-cta" onclick="addToShortlist('${fc.slug}', this)">Add to shortlist</button>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('searchInput').addEventListener('input', e=>{ state.search = e.target.value.toLowerCase(); render(); });
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+  }
+
+  loadCatalog();
+</script>
+</body>
+</html>

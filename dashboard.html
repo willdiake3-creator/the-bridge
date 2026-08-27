@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passage — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0B1220; --dusk:#141F33; --dusk-2:#1B2A45; --amber:#E8A64C; --amber-soft:#F0C784;
+    --parchment:#F3EFE6; --mist:#8B94A8; --verdigris:#4F7566; --line:rgba(243,239,230,0.10); --red:#E07B67; }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--parchment);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;} button{font-family:inherit;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+
+  .shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+  .rail{border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;}
+  .rail .brand{display:flex;align-items:center;gap:9px;padding:8px 10px 22px;font-family:'Fraunces',serif;font-weight:600;font-size:17px;}
+  .rail .mark{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--amber),var(--verdigris));display:grid;place-items:center;font-size:11px;color:var(--ink);font-weight:700;}
+  .rail a, .rail button.tab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--mist);font-size:14px;background:none;border:none;text-align:left;cursor:pointer;width:100%;}
+  .rail a:hover, .rail button.tab:hover{background:var(--dusk);color:var(--parchment);}
+  .rail button.tab.active{background:var(--dusk-2);color:var(--parchment);}
+  .rail .divider{height:1px;background:var(--line);margin:14px 8px;}
+  .rail .spacer{flex:1;}
+  .rail .user{padding:10px 12px;font-size:12.5px;color:var(--mist);border-top:1px solid var(--line);padding-top:16px;}
+  .rail .signout{background:none;border:none;color:var(--mist);font-size:12px;cursor:pointer;padding:6px 12px;text-align:left;}
+  .rail .signout:hover{color:var(--red);}
+
+  main{padding:32px clamp(20px,3vw,48px) 80px;max-width:1300px;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:14px;}
+  .topbar h1{font-size:27px;}
+  .topbar p{color:var(--mist);font-size:14px;margin:6px 0 0;}
+
+  .conn-banner{display:none;margin-bottom:22px;padding:12px 16px;border-radius:12px;background:rgba(224,123,103,.1);border:1px solid rgba(224,123,103,.35);color:var(--red);font-size:13px;line-height:1.5;}
+  .conn-banner.show{display:block;}
+  .conn-banner code{background:rgba(11,18,32,.5);padding:1px 6px;border-radius:5px;}
+
+  .activity-bar{background:linear-gradient(90deg,var(--dusk),var(--dusk-2));border:1px solid var(--line);border-radius:14px;padding:13px 18px;display:flex;align-items:center;gap:12px;margin-bottom:28px;overflow:hidden;}
+  .activity-bar .pulse{width:7px;height:7px;border-radius:50%;background:var(--verdigris);box-shadow:0 0 10px var(--verdigris);flex:none;}
+  .activity-bar .txt{font-size:13.5px;color:var(--parchment);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .activity-bar .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mist);text-transform:uppercase;letter-spacing:.06em;flex:none;}
+
+  .tabpanel{display:none;} .tabpanel.active{display:block;}
+  .empty-note{color:var(--mist);font-size:14px;padding:20px 0;}
+  .empty-note a{color:var(--amber-soft);}
+
+  .kanban{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px;}
+  .kcol{background:var(--dusk);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:200px;min-height:120px;}
+  .kcol h4{margin:0 0 4px;font-size:12px;color:var(--mist);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between;}
+  .kcol .kcount{color:var(--amber-soft);}
+  .kcard{background:var(--dusk-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-top:10px;font-size:13px;cursor:grab;}
+  .kcard:active{cursor:grabbing;}
+  .kcard.dragging{opacity:.4;}
+  .kcol.dragover{border-color:rgba(232,166,76,.5);background:rgba(232,166,76,.04);}
+  .kcard b{display:block;font-size:13.5px;margin-bottom:4px;color:var(--parchment);}
+  .kcard span{color:var(--mist);font-size:11px;}
+  .kcard .flag{display:inline-block;margin-top:6px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;color:var(--red);}
+  .kcard .confirm-fee{display:block;margin-top:8px;font-size:11px;background:none;border:1px solid rgba(232,166,76,.35);color:var(--amber-soft);padding:5px 10px;border-radius:999px;cursor:pointer;}
+
+  .section-title{display:flex;align-items:center;justify-content:space-between;margin:38px 0 16px;}
+  .section-title h2{font-size:19px;}
+  .section-title .sub{font-size:13px;color:var(--mist);}
+
+  .wallet-grid{display:grid;grid-template-columns:1.1fr 1.4fr;gap:18px;}
+  @media (max-width:920px){ .wallet-grid{grid-template-columns:1fr;} }
+  .balance-card{background:linear-gradient(160deg, var(--dusk-2), var(--ink));border:1px solid var(--line);border-radius:18px;padding:26px;display:flex; flex-direction:column; gap:6px; justify-content:space-between; min-height:230px;}
+  .balance-card .label{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mist);}
+  .balance-card .amt{font-family:'Fraunces',serif;font-size:44px;font-weight:600;color:var(--parchment);}
+  .balance-card .amt span{font-size:20px;color:var(--mist);}
+  .topup-btn{align-self:flex-start;background:var(--amber);color:var(--ink);border:none;padding:10px 18px;border-radius:999px;font-weight:600;font-size:13.5px;cursor:pointer;margin-top:10px;}
+  .tier-mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .tier-opt{background:var(--dusk);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;font-size:13px;}
+  .tier-opt.selected{border-color:var(--amber);background:rgba(232,166,76,.06);}
+  .tier-opt b{display:block;margin-bottom:4px;color:var(--parchment);font-size:13.5px;}
+  .tier-opt span{color:var(--mist);font-size:11.5px;line-height:1.4;}
+  .tx-list{margin-top:14px;display:flex;flex-direction:column;gap:0;}
+  .tx-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .tx-row:last-child{border-bottom:none;}
+  .tx-row .tx-name{color:var(--parchment);} .tx-row .tx-meta{color:var(--mist);font-size:11.5px;}
+  .tx-row .tx-amt{font-family:'IBM Plex Mono',monospace;color:var(--amber-soft);}
+
+  .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .doc-card{background:var(--dusk);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;}
+  .doc-card.upload-card{align-items:center;justify-content:center;text-align:center;border-style:dashed;cursor:pointer;color:var(--mist);}
+  .doc-card.upload-card:hover{border-color:var(--amber);color:var(--amber-soft);}
+  .doc-card .dicon{width:34px;height:34px;border-radius:9px;background:var(--dusk-2);display:grid;place-items:center;font-size:15px;}
+  .doc-card h4{font-size:14.5px;margin:0;}
+  .doc-status{font-size:11.5px;font-family:'IBM Plex Mono',monospace;padding:3px 8px;border-radius:999px;align-self:flex-start;}
+  .doc-status.parsed{background:rgba(79,117,102,.2);color:#8fc4ac;border:1px solid rgba(79,117,102,.4);}
+  .doc-status.pending{background:rgba(232,166,76,.15);color:var(--amber-soft);border:1px solid rgba(232,166,76,.35);}
+  .doc-convert-btn{font-size:11px;background:none;border:1px solid var(--line);color:var(--parchment);padding:5px 10px;border-radius:999px;cursor:pointer;align-self:flex-start;}
+
+  .gpa-table{margin-top:22px;background:var(--dusk);border:1px solid var(--line);border-radius:16px;padding:20px;}
+  .gpa-table table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .gpa-table th{text-align:left;color:var(--mist);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding-bottom:12px;font-weight:500;}
+  .gpa-table td{padding:10px 0;border-top:1px solid var(--line);}
+  .gpa-table td.scale-val{font-family:'IBM Plex Mono',monospace;color:var(--amber-soft);}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dusk-2);border:1px solid var(--line);color:var(--parchment);padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;max-width:380px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="rail">
+    <a href="landing.html" class="brand"><span class="mark">P</span>Passage</a>
+    <button class="tab active" data-tab="overview">Dashboard</button>
+    <a href="programs.html">Find programs</a>
+    <button class="tab" data-tab="vault">Profile &amp; Vault</button>
+    <button class="tab" data-tab="wallet">Fee Wallet</button>
+    <a href="sop-drafting.html">Essays</a>
+    <a href="referee-portal.html">Referees</a>
+    <a href="staged-submission.html">Staged submissions</a>
+    <div class="divider"></div>
+    <a href="#">Settings</a>
+    <div class="spacer"></div>
+    <div class="user" id="userBox">…</div>
+    <button class="signout" id="signoutBtn">Sign out</button>
+  </div>
+
+  <main>
+    <div class="topbar">
+      <div><h1 id="greeting">Good evening</h1><p id="subline">Loading your applications…</p></div>
+    </div>
+
+    <div class="conn-banner" id="connBanner"></div>
+
+    <div class="activity-bar">
+      <span class="pulse"></span>
+      <span class="label">Agent activity</span>
+      <span class="txt" id="activityTxt">Waiting for activity…</span>
+    </div>
+
+    <div class="tabpanel active" id="tab-overview">
+      <div class="section-title"><h2>Application board</h2><span class="sub">Drag cards as things move — this writes back to the API immediately</span></div>
+      <div class="kanban" id="kanban"></div>
+    </div>
+
+    <div class="tabpanel" id="tab-vault">
+      <div class="section-title"><h2>Document vault</h2><span class="sub">Uploaded once, reused across every application</span></div>
+      <div class="vault-grid" id="vaultGrid"></div>
+      <input type="file" id="fileInput" style="display:none;">
+      <div class="gpa-table">
+        <table id="gpaTable">
+          <tr><th>Original</th><th>US 4.0</th><th>ECTS</th><th>German (1.0–4.0)</th><th>UK Honours</th></tr>
+        </table>
+        <p class="empty-note" id="gpaEmpty" style="display:none;">No conversions yet — upload a transcript, then click "Convert GPA" on it.</p>
+      </div>
+      <div class="section-title"><h2>Referee outreach</h2><span class="sub">Manage recommendation letters</span></div>
+      <p style="color:var(--mist);font-size:14px;">Head to the <a href="referee-portal.html" style="color:var(--amber-soft);">Referee portal</a> to generate upload links for your professors.</p>
+    </div>
+
+    <div class="tabpanel" id="tab-wallet">
+      <div class="section-title"><h2>Fee wallet &amp; strategy</h2><span class="sub" id="tierSub">Loading your strategy…</span></div>
+      <div class="wallet-grid">
+        <div class="balance-card">
+          <div><div class="label">Available balance</div><div class="amt" id="balanceAmt">$0<span>.00</span></div></div>
+          <div>
+            <button class="topup-btn" id="topupBtn">Top up wallet</button>
+            <p style="font-size:11.5px;color:var(--mist);margin:10px 0 0;">Every charge needs your one-tap confirmation on the staged-submission screen first — nothing charges automatically.</p>
+          </div>
+        </div>
+        <div>
+          <div class="tier-mini" id="tierMini"></div>
+          <div class="tx-list" id="txList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<script>
+  const API_BASE = window.PASSAGE_API_BASE || 'http://localhost:8000';
+  const AuthStore = (() => {
+    let mem = {};
+    const safeGet = k => { try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } };
+    const safeRemove = k => { try { localStorage.removeItem(k); } catch(e){ delete mem[k]; } };
+    return { getAccess: () => safeGet('passage_access'), clear: () => { safeRemove('passage_access'); safeRemove('passage_refresh'); } };
+  })();
+  if (!AuthStore.getAccess()) { window.location.href = 'landing.html'; }
+
+  async function apiFetch(path, options = {}) {
+    const token = AuthStore.getAccess();
+    const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    let res;
+    try { res = await fetch(`${API_BASE}${path}`, { ...options, headers }); }
+    catch (e) { throw { offline: true, message: `Can't reach the API at ${API_BASE}. Is the backend running?` }; }
+    if (res.status === 401) { AuthStore.clear(); window.location.href = 'landing.html'; throw { message: 'Session expired' }; }
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = (await res.json()).detail || detail; } catch(e){}
+      throw { message: detail };
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  function connError(msg){
+    const el = document.getElementById('connBanner');
+    el.innerHTML = `${msg} — start it with <code>uvicorn app.main:app --reload</code> from <code>backend/</code>.`;
+    el.classList.add('show');
+  }
+
+  document.getElementById('signoutBtn').onclick = () => { AuthStore.clear(); window.location.href = 'landing.html'; };
+
+  // ---- tabs ----
+  document.querySelectorAll('.rail .tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.rail .tab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  const COLUMNS = [
+    ["matched","Matched"],["sop_tailoring","SOP Tailoring"],["staged_awaiting_user","Staged — Awaiting You"],
+    ["submitted","Submitted"],["action_required","Action Required"],["decision_received","Decision Received"],
+  ];
+  let applications = [];
+
+  function centsToDollars(c){ return `$${(c/100).toFixed(2)}`; }
+
+  function renderKanban(){
+    const wrap = document.getElementById('kanban'); wrap.innerHTML='';
+    if (!applications.length) {
+      wrap.innerHTML = `<div style="grid-column:1/-1;" class="empty-note">No applications yet — head to <a href="programs.html">Find Programs</a> to add some.</div>`;
+      return;
+    }
+    COLUMNS.forEach(([key, label], ci)=>{
+      const col = document.createElement('div');
+      col.className='kcol'; col.dataset.status = key;
+      const inCol = applications.filter(a=>a.status===key);
+      col.innerHTML = `<h4>${label}<span class="kcount">${inCol.length}</span></h4>` + inCol.map(a=>{
+        const needsConfirm = key==='staged_awaiting_user' && a.fee_status==='fee_required' && !a.fee_confirmed;
+        return `<div class="kcard" draggable="true" data-id="${a.id}">
+          <b>${a.university_name}</b><span>${a.program_name}</span>
+          ${a.fee_status==='fee_required' ? `<span class="flag">${a.fee_confirmed ? 'Fee confirmed' : centsToDollars(a.application_fee_cents)+' fee — not yet confirmed'}</span>` : ''}
+          ${needsConfirm ? `<button class="confirm-fee" onclick="confirmFee('${a.id}', event)">Confirm &amp; charge</button>` : ''}
+        </div>`;
+      }).join('');
+      col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('dragover'); });
+      col.addEventListener('dragleave', ()=>col.classList.remove('dragover'));
+      col.addEventListener('drop', async e=>{
+        e.preventDefault(); col.classList.remove('dragover');
+        const id = e.dataTransfer.getData('text/plain');
+        const app = applications.find(a=>a.id===id);
+        if (!app || app.status === key) return;
+        const prevStatus = app.status;
+        app.status = key; renderKanban();
+        try { await apiFetch(`/applications/${id}/status`, { method:'PATCH', body: JSON.stringify({status:key}) }); showToast(`Moved to "${label}"`); loadActivity(); }
+        catch (err) { app.status = prevStatus; renderKanban(); showToast(err.message || 'Could not move card'); }
+      });
+      wrap.appendChild(col);
+    });
+    document.querySelectorAll('.kcard').forEach(el=>{
+      el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', el.dataset.id); el.classList.add('dragging'); });
+      el.addEventListener('dragend', ()=> el.classList.remove('dragging'));
+    });
+  }
+
+  async function confirmFee(appId, evt){
+    evt.stopPropagation();
+    const btn = evt.target; btn.disabled = true; btn.textContent = 'Charging…';
+    try {
+      await apiFetch('/wallet/fee/confirm', { method:'POST', body: JSON.stringify({ application_id: appId, confirmed: true }) });
+      showToast('Fee confirmed and charged from your wallet');
+      await loadApplications();
+      await loadWallet();
+    } catch (err) {
+      showToast(err.message || 'Could not confirm the fee — check your wallet balance');
+      btn.disabled = false; btn.textContent = 'Confirm & charge';
+    }
+  }
+
+  async function loadApplications(){
+    try { applications = await apiFetch('/applications'); renderKanban(); }
+    catch (err) { connError(err.message); }
+  }
+
+  // ---- agent activity feed (real, polled) ----
+  function describeEvent(ev){
+    const type = { matched: 'Matched to', status_changed: 'Status updated for', fee_confirmed: 'Fee confirmed for' }[ev.event_type] || ev.event_type;
+    return `${type} ${ev.program_name}`;
+  }
+  async function loadActivity(){
+    try {
+      const events = await apiFetch('/applications/events/recent?limit=10');
+      if (events.length) document.getElementById('activityTxt').textContent = describeEvent(events[0]);
+      else document.getElementById('activityTxt').textContent = 'No agent activity yet — add a program to get started.';
+    } catch (e) { /* keep last known text on transient errors */ }
+  }
+
+  // ---- wallet ----
+  const TIERS = [
+    ["zero_fee_only","$0-fee only","Only shows fee-free programs."],
+    ["fee_waiver_priority","Fee-waiver priority","You confirm every waiver before it's used."],
+    ["fee_based_prefunded","Fee-based, pre-funded","1-tap confirm per charge."],
+    ["hybrid_smart_tiering","Hybrid smart tiering","Recommended — clears free/waiver first."],
+  ];
+  let currentFeeStrategy = 'hybrid_smart_tiering';
+  function renderTiers(){
+    const wrap = document.getElementById('tierMini'); wrap.innerHTML='';
+    TIERS.forEach(([key,t,d])=>{
+      const el = document.createElement('div');
+      el.className='tier-opt'+(key===currentFeeStrategy?' selected':'');
+      el.innerHTML = `<b>${t}</b><span>${d}</span>`;
+      el.onclick = async ()=>{
+        const prev = currentFeeStrategy;
+        currentFeeStrategy = key; renderTiers();
+        try { await apiFetch('/auth/me', { method:'PATCH', body: JSON.stringify({ fee_strategy: key }) }); showToast(`Fee strategy set to "${t}"`); }
+        catch (err) { currentFeeStrategy = prev; renderTiers(); showToast(err.message || 'Could not save'); }
+      };
+      wrap.appendChild(el);
+    });
+    document.getElementById('tierSub').textContent = TIERS.find(t=>t[0]===currentFeeStrategy)?.[1] || '';
+  }
+
+  async function loadWallet(){
+    try {
+      const [wallet, txs] = await Promise.all([apiFetch('/wallet'), apiFetch('/wallet/transactions')]);
+      document.getElementById('balanceAmt').innerHTML = `$${Math.floor(wallet.balance_cents/100)}<span>.${String(wallet.balance_cents%100).padStart(2,'0')}</span>`;
+      document.getElementById('txList').innerHTML = txs.length ? txs.map(t=>`
+        <div class="tx-row"><div><div class="tx-name">${t.type.replace(/_/g,' ')}</div><div class="tx-meta">${t.kpay_reference || 'internal ledger'} · ${new Date(t.created_at).toLocaleDateString()}</div></div><div class="tx-amt">${centsToDollars(t.amount_cents)}</div></div>`).join('')
+        : `<p class="empty-note">No transactions yet.</p>`;
+    } catch (err) { connError(err.message); }
+  }
+
+  document.getElementById('topupBtn').onclick = async () => {
+    const amount = prompt('Top up amount in USD (e.g. 100):', '100');
+    if (!amount || isNaN(amount)) return;
+    try {
+      const data = await apiFetch('/wallet/topup', { method:'POST', body: JSON.stringify({ amount_cents: Math.round(parseFloat(amount)*100), currency:'USD' }) });
+      showToast('Redirecting to Kpay checkout…');
+      if (data.checkout_url) window.open(data.checkout_url, '_blank');
+    } catch (err) {
+      showToast(err.message || 'Top-up needs live Kpay credentials configured in the backend .env');
+    }
+  };
+
+  // ---- vault ----
+  let uploadingDocType = null;
+  const DOC_TYPES = [
+    ["transcript","📄","Official Transcript"], ["passport","🛂","Passport"],
+    ["test_score","🧪","Test Score Report"], ["financial_proof","💳","Financial Proof"],
+  ];
+  async function loadVault(){
+    let docs = [];
+    try { docs = await apiFetch('/documents'); } catch (err) { connError(err.message); }
+    const grid = document.getElementById('vaultGrid'); grid.innerHTML = '';
+    DOC_TYPES.forEach(([type, icon, label])=>{
+      const existing = docs.find(d=>d.doc_type===type);
+      const card = document.createElement('div');
+      if (existing) {
+        card.className = 'doc-card';
+        card.innerHTML = `<div class="dicon">${icon}</div><h4>${label}</h4><span class="doc-status ${existing.ocr_status}">${existing.ocr_status === 'parsed' ? 'Parsed' : 'Awaiting parse'}</span>` +
+          (type==='transcript' && existing.ocr_status!=='parsed' ? `<button class="doc-convert-btn" onclick="convertGpa('${existing.id}')">Convert GPA</button>` : '');
+      } else {
+        card.className = 'doc-card upload-card';
+        card.innerHTML = `<div class="dicon">${icon}</div><h4>${label}</h4><span style="font-size:12px;">Click to upload</span>`;
+        card.onclick = () => triggerUpload(type);
+      }
+      grid.appendChild(card);
+    });
+    await loadGpaTable();
+  }
+
+  function triggerUpload(docType){
+    uploadingDocType = docType;
+    document.getElementById('fileInput').click();
+  }
+  document.getElementById('fileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if (!file || !uploadingDocType) return;
+    const fd = new FormData();
+    fd.append('doc_type', uploadingDocType);
+    fd.append('file', file);
+    try {
+      await apiFetch('/documents', { method:'POST', body: fd });
+      showToast(`${file.name} uploaded`);
+      await loadVault();
+    } catch (err) { showToast(err.message || 'Upload failed'); }
+    e.target.value = '';
+  });
+
+  window.convertGpa = async function(docId){
+    const val = prompt('Original grade (0–100 scale) to convert:', '87.4');
+    if (!val || isNaN(val)) return;
+    try {
+      await apiFetch(`/documents/${docId}/convert-gpa?original_value=${encodeURIComponent(val)}&original_scale=100-point`, { method:'POST' });
+      showToast('Converted — see the table below');
+      await loadVault();
+    } catch (err) { showToast(err.message || 'Conversion failed'); }
+  };
+
+  async function loadGpaTable(){
+    let rows = [];
+    try { rows = await apiFetch('/documents/gpa-conversions'); } catch (e) {}
+    const table = document.getElementById('gpaTable');
+    table.querySelectorAll('tr:not(:first-child)').forEach(r=>r.remove());
+    document.getElementById('gpaEmpty').style.display = rows.length ? 'none' : 'block';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.original_value} / 100</td><td class="scale-val">${r.us_4_0 ?? '—'}</td><td class="scale-val">${r.ects_grade ?? '—'}</td><td class="scale-val">${r.german_scale ?? '—'}</td><td class="scale-val">${r.uk_honours ?? '—'}</td>`;
+      table.appendChild(tr);
+    });
+  }
+
+  // ---- boot ----
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+  }
+
+  (async function init(){
+    try {
+      const me = await apiFetch('/auth/me');
+      const hour = new Date().getHours();
+      document.getElementById('greeting').textContent = `Good ${hour<12?'morning':hour<18?'afternoon':'evening'}, ${me.full_name.split(' ')[0]}`;
+      document.getElementById('userBox').innerHTML = `${me.full_name}<br><span class="mono" style="font-size:11px;">${me.proxy_email || me.email}</span>`;
+      currentFeeStrategy = me.fee_strategy;
+      renderTiers();
+    } catch (err) { connError(err.message); }
+
+    await loadApplications();
+    document.getElementById('subline').textContent = applications.length
+      ? `${applications.length} application${applications.length===1?'':'s'} in motion`
+      : 'No applications yet — start from Find Programs';
+    loadActivity();
+    loadWallet();
+    loadVault();
+    setInterval(loadActivity, 6000);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passage — Referee portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#0B1220; --dusk:#141F33; --dusk-2:#1B2A45; --amber:#E8A64C; --amber-soft:#F0C784;
+    --parchment:#F3EFE6; --mist:#8B94A8; --verdigris:#4F7566; --line:rgba(243,239,230,0.10); --red:#E07B67; }
+  *{box-sizing:border-box;} body{margin:0;background:var(--ink);color:var(--parchment);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;} button{font-family:inherit;}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(20px,5vw,56px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,18,32,.9);backdrop-filter:blur(12px);z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-family:'Fraunces',serif;font-weight:600;}
+  .brand .mark{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--amber),var(--verdigris));display:grid;place-items:center;font-size:12px;color:var(--ink);font-weight:700;}
+  .navlinks{display:flex;gap:26px;font-size:14px;color:var(--mist);}
+  .navlinks a.active{color:var(--parchment);}
+
+  main{max-width:900px;margin:0 auto;padding:44px clamp(20px,5vw,56px) 100px;}
+  .head .kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--verdigris);text-transform:uppercase;letter-spacing:.1em;}
+  .head h1{font-size:clamp(26px,3.6vw,36px);margin:10px 0 10px;}
+  .head p{color:var(--mist);font-size:15px;line-height:1.6;max-width:60ch;}
+
+  .conn-banner{display:none;margin:18px 0;padding:12px 16px;border-radius:12px;background:rgba(224,123,103,.1);border:1px solid rgba(224,123,103,.35);color:var(--red);font-size:13px;line-height:1.5;}
+  .conn-banner.show{display:block;}
+  .conn-banner code{background:rgba(11,18,32,.5);padding:1px 6px;border-radius:5px;}
+
+  .panel{background:var(--dusk);border:1px solid var(--line);border-radius:16px;padding:22px;}
+  .add-row{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;}
+  .add-row input{flex:1;min-width:160px;background:rgba(11,18,32,.6);border:1px solid var(--line);border-radius:10px;padding:11px 13px;color:var(--parchment);font-size:14px;}
+  .add-row button{background:var(--amber);color:var(--ink);border:none;border-radius:10px;padding:0 18px;font-weight:600;font-size:13.5px;cursor:pointer;}
+
+  .ref-row{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid var(--line);gap:14px;flex-wrap:wrap;}
+  .ref-row:last-child{border-bottom:none;}
+  .ref-info b{display:block;font-size:14.5px;}
+  .ref-info span{color:var(--mist);font-size:12.5px;}
+  .ref-status{display:flex;align-items:center;gap:10px;}
+  .status-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);}
+  .status-tag.not_sent{color:var(--mist);}
+  .status-tag.sent, .status-tag.viewed{color:var(--amber-soft);border-color:rgba(232,166,76,.35);background:rgba(232,166,76,.08);}
+  .status-tag.uploaded{color:#8fc4ac;border-color:rgba(79,117,102,.4);background:rgba(79,117,102,.15);}
+  .mini-btn{background:none;border:1px solid var(--line);color:var(--parchment);font-size:12px;padding:7px 12px;border-radius:999px;cursor:pointer;}
+  .mini-btn:hover{border-color:var(--amber);color:var(--amber-soft);}
+  .link-box{margin-top:6px;font-size:11px;color:var(--mist);font-family:'IBM Plex Mono',monospace;background:rgba(11,18,32,.5);padding:6px 10px;border-radius:8px;display:none;word-break:break-all;}
+  .link-box.show{display:block;}
+  .empty-note{color:var(--mist);font-size:14px;padding:10px 0;}
+
+  .ref-shell{max-width:520px;margin:0 auto;background:var(--dusk);border:1px solid var(--line);border-radius:18px;padding:30px;}
+  .ref-shell .from{font-size:13px;color:var(--mist);margin-bottom:4px;}
+  .ref-shell h2{font-size:21px;margin-bottom:6px;}
+  .ref-shell .apps{font-size:13.5px;color:var(--mist);margin-bottom:22px;line-height:1.6;}
+  .dropzone{border:1.5px dashed var(--line);border-radius:14px;padding:38px 20px;text-align:center;color:var(--mist);font-size:13.5px;cursor:pointer;transition:.2s;}
+  .dropzone:hover, .dropzone.drag{border-color:var(--amber);color:var(--amber-soft);background:rgba(232,166,76,.05);}
+  .file-chip{margin-top:14px;display:flex;align-items:center;justify-content:space-between;background:var(--dusk-2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;}
+  .submit-ref{width:100%;margin-top:20px;background:linear-gradient(135deg,var(--amber),#d98f3a);color:var(--ink);border:none;border-radius:11px;padding:13px;font-weight:700;font-size:14.5px;cursor:pointer;}
+  .submit-ref:disabled{opacity:.5;cursor:not-allowed;}
+  .confirm{display:none;text-align:center;padding:30px 10px;}
+  .confirm.show{display:block;}
+  .confirm .check{width:52px;height:52px;border-radius:50%;background:rgba(79,117,102,.2);border:1px solid rgba(79,117,102,.4);display:grid;place-items:center;margin:0 auto 16px;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dusk-2);border:1px solid var(--line);color:var(--parchment);padding:12px 18px;border-radius:12px;font-size:13.5px;z-index:200;opacity:0;pointer-events:none;transition:opacity .3s ease, transform .3s ease;max-width:380px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="landing.html" class="brand"><span class="mark">P</span> Passage</a>
+  <div class="navlinks">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="programs.html">Find programs</a>
+    <a href="sop-drafting.html">Essays</a>
+    <a href="referee-portal.html" class="active">Referees</a>
+  </div>
+</nav>
+
+<main>
+  <div id="studentSection">
+    <div class="head">
+      <span class="kicker">Automated referee outreach</span>
+      <h1>Recommendation letters, without the email chasing</h1>
+      <p>Generate a secure, single-use link for each recommender. They upload the letter directly — no account, no forwarding through you, no sealed envelopes lost in the mail.</p>
+    </div>
+    <div class="conn-banner" id="connBanner"></div>
+    <div class="panel">
+      <div class="add-row">
+        <input id="refName" type="text" placeholder="Referee's name">
+        <input id="refEmail" type="email" placeholder="Referee's email">
+        <input id="refRel" type="text" placeholder="Relationship (e.g. Thesis advisor)">
+        <button onclick="addReferee()">Add referee</button>
+      </div>
+      <div id="refList"><p class="empty-note">Loading your referees…</p></div>
+    </div>
+  </div>
+
+  <!-- Public referee upload view — rendered instead of the student section when ?token=... is present -->
+  <div id="refereeSection" style="display:none;">
+    <div class="ref-shell">
+      <div class="from mono">passage-referee@applybridge.com</div>
+      <h2 id="refHeading">Letter request</h2>
+      <div class="apps" id="refAppsText"></div>
+      <div id="dz" class="dropzone" onclick="document.getElementById('fileInput').click()">Drag a PDF here, or click to browse</div>
+      <input type="file" id="fileInput" style="display:none;">
+      <div id="fileChipWrap"></div>
+      <button class="submit-ref" id="refSubmitBtn" disabled onclick="submitReferee()">Upload letter</button>
+      <div class="confirm" id="refConfirm">
+        <div class="check"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8fc4ac" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <h3 style="font-size:17px;margin-bottom:6px;">Letter received</h3>
+        <p style="color:var(--mist);font-size:13.5px;">You're done — no further steps needed on your end.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"><span id="toastText"></span></div>
+
+<script>
+  const API_BASE = window.PASSAGE_API_BASE || 'http://localhost:8000';
+  const AuthStore = (() => {
+    let mem = {};
+    const safeGet = k => { try { return localStorage.getItem(k); } catch(e){ return mem[k] ?? null; } };
+    return { getAccess: () => safeGet('passage_access') };
+  })();
+  async function apiFetch(path, options = {}) {
+    const token = AuthStore.getAccess();
+    const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    let res;
+    try { res = await fetch(`${API_BASE}${path}`, { ...options, headers }); }
+    catch (e) { throw { offline: true, message: `Can't reach the API at ${API_BASE}. Is the backend running?` }; }
+    if (!res.ok) { let detail = res.statusText; try { detail = (await res.json()).detail || detail; } catch(e){} throw { message: detail }; }
+    return res.status === 204 ? null : res.json();
+  }
+  function connError(msg){
+    const el = document.getElementById('connBanner');
+    if(!el) return;
+    el.innerHTML = `${msg} — start it with <code>uvicorn app.main:app --reload</code> from <code>backend/</code>.`;
+    el.classList.add('show');
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+  }
+
+  if (token) {
+    // ---- public referee-facing view ----
+    document.getElementById('studentSection').style.display = 'none';
+    document.getElementById('refereeSection').style.display = 'block';
+    initRefereeView();
+  } else {
+    // ---- student-facing view ----
+    if (!AuthStore.getAccess()) { window.location.href = 'landing.html'; }
+    else loadReferees();
+  }
+
+  // ================= Student view =================
+  function labelFor(s){ return {not_sent:"Not sent",sent:"Sent",viewed:"Viewed",uploaded:"Uploaded ✓"}[s] || s; }
+
+  async function loadReferees(){
+    try {
+      const referees = await apiFetch('/referees');
+      renderReferees(referees);
+    } catch (err) { connError(err.message); document.getElementById('refList').innerHTML = ''; }
+  }
+
+  function renderReferees(referees){
+    const wrap = document.getElementById('refList');
+    if (!referees.length) { wrap.innerHTML = '<p class="empty-note">No referees added yet.</p>'; return; }
+    wrap.innerHTML = referees.map(r => `
+      <div class="ref-row">
+        <div class="ref-info"><b>${r.name}</b><span>${r.email}</span>
+          <div class="link-box ${r.status !== 'not_sent' ? 'show' : ''}" id="linkbox-${r.id}">${window.location.origin}${window.location.pathname}?token=${r.upload_link_token}</div>
+        </div>
+        <div class="ref-status">
+          <span class="status-tag ${r.status}">${labelFor(r.status)}</span>
+          ${r.status === 'not_sent'
+            ? `<button class="mini-btn" onclick="sendLink('${r.id}')">Send link</button>`
+            : r.status !== 'uploaded' ? `<button class="mini-btn" onclick="remind('${r.id}')">Remind</button>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  async function addReferee(){
+    const name = document.getElementById('refName').value.trim();
+    const email = document.getElementById('refEmail').value.trim();
+    const relationship_label = document.getElementById('refRel').value.trim() || 'Recommender';
+    if (!name || !email) { showToast('Add a name and email first'); return; }
+    try {
+      await apiFetch('/referees', { method:'POST', body: JSON.stringify({ name, email, relationship_label }) });
+      document.getElementById('refName').value=''; document.getElementById('refEmail').value=''; document.getElementById('refRel').value='';
+      showToast(`${name} added`);
+      loadReferees();
+    } catch (err) { showToast(err.message || 'Could not add referee'); }
+  }
+
+  window.sendLink = async function(id){
+    try { await apiFetch(`/referees/${id}/send-link`, { method:'POST' }); showToast('Secure upload link sent'); loadReferees(); }
+    catch (err) { showToast(err.message || 'Could not send link'); }
+  };
+  window.remind = async function(id){
+    try { await apiFetch(`/referees/${id}/remind`, { method:'POST' }); showToast('Polite reminder sent'); loadReferees(); }
+    catch (err) { showToast(err.message || 'Could not send reminder'); }
+  };
+
+  // ================= Referee (public) view =================
+  async function initRefereeView(){
+    try {
+      const data = await apiFetch(`/referee-upload/${token}`);
+      document.getElementById('refHeading').textContent = `Letter request from ${data.student_name || 'a Passage student'}`;
+      document.getElementById('refAppsText').textContent = `You've been listed as a referee${data.relationship ? ' (' + data.relationship + ')' : ''}. Upload one letter and Passage attaches it to their applications automatically.`;
+    } catch (err) {
+      document.getElementById('refHeading').textContent = "This link isn't valid";
+      document.getElementById('refAppsText').textContent = err.message || 'The upload link may have expired.';
+      document.getElementById('dz').style.display = 'none';
+    }
+  }
+
+  let chosenFile = null;
+  function fileChosen(files){
+    if (!files.length) return;
+    chosenFile = files[0];
+    document.getElementById('fileChipWrap').innerHTML = `<div class="file-chip"><span>📄 ${chosenFile.name}</span><span class="mono" style="color:var(--mist);">${Math.round(chosenFile.size/1024)} KB</span></div>`;
+    document.getElementById('refSubmitBtn').disabled = false;
+  }
+  document.getElementById('fileInput').addEventListener('change', e => fileChosen(e.target.files));
+  const dz = document.getElementById('dz');
+  dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+  dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('drag'); fileChosen(e.dataTransfer.files); });
+
+  async function submitReferee(){
+    if (!chosenFile) return;
+    const btn = document.getElementById('refSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Uploading…';
+    const fd = new FormData();
+    fd.append('file', chosenFile);
+    try {
+      await apiFetch(`/referee-upload/${token}`, { method:'POST', body: fd });
+      document.querySelector('.ref-shell > .from').style.display='none';
+      document.getElementById('dz').style.display='none';
+      document.getElementById('fileChipWrap').style.display='none';
+      btn.style.display='none';
+      document.querySelector('.ref-shell h2').style.display='none';
+      document.querySelector('.ref-shell .apps').style.display='none';
+      document.getElementById('refConfirm').classList.add('show');
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Upload letter';
+      showToast(err.message || 'Upload failed');
+    }
+  }
+</script>
+</body>
+</html>
